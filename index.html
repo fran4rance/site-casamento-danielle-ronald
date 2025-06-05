@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,8 +7,6 @@
   <title>Danielle & Ronald</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet" />
   <style>
-    /* Seu CSS aqui (igual o anterior) */
-    /* Vou colocar só o que precisa pra barra funcionar */
     body {
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(135deg, #fdfaf5, #f5f5dc);
@@ -92,7 +91,6 @@
       margin-top: 20px;
       font-size: 1rem;
     }
-    /* Barra de progresso */
     #progressBarContainer {
       width: 100%;
       background-color: #eee;
@@ -100,7 +98,7 @@
       margin: 20px 0 0;
       height: 20px;
       overflow: hidden;
-      display: none; /* esconde inicialmente */
+      display: none;
     }
     #progressBar {
       height: 100%;
@@ -139,7 +137,7 @@
 
   <div class="content">
     <div class="upload-card">
-      <input type="file" id="fileInput" accept="image/*" />
+      <input type="file" id="fileInput" accept="image/*" multiple />
       <button id="uploadBtn">Enviar foto</button>
       <div id="progressBarContainer">
         <div id="progressBar"></div>
@@ -149,7 +147,6 @@
   </div>
 
   <footer>14-06-2025</footer>
-
   <canvas class="confetti" id="confettiCanvas"></canvas>
 
   <script>
@@ -160,22 +157,41 @@
     const progressBar = document.getElementById("progressBar");
 
     button.addEventListener("click", () => {
-      if (!input.files[0]) {
-        message.innerHTML = '<span style="color: red;">Por favor, selecione uma imagem.</span>';
+      if (input.files.length === 0) {
+        message.innerHTML = '<span style="color: red;">Por favor, selecione pelo menos uma imagem.</span>';
         return;
       }
-      uploadFile(input.files[0]);
+
+      uploadMultipleFiles(input.files);
     });
 
-    function uploadFile(file) {
-      message.innerHTML = "";
+    function uploadMultipleFiles(files) {
+      let index = 0;
+
+      function next() {
+        if (index >= files.length) {
+          button.disabled = false;
+          message.innerHTML += '<br><span style="color: green;">Todas as fotos foram enviadas! 🎉</span>';
+          input.value = "";
+          return;
+        }
+
+        message.innerHTML = `<span style="color: #555;">Enviando foto ${index + 1} de ${files.length}...</span>`;
+        uploadFile(files[index], () => {
+          index++;
+          next();
+        });
+      }
+
       button.disabled = true;
       progressBarContainer.style.display = "block";
       progressBar.style.width = "0%";
+      next();
+    }
 
+    function uploadFile(file, callback) {
       const formData = new FormData();
       formData.append("image", file);
-
       const apiKey = "c904a909344edca34de59a9817cad325";
 
       const xhr = new XMLHttpRequest();
@@ -189,33 +205,32 @@
       };
 
       xhr.onload = function() {
-        button.disabled = false;
         progressBarContainer.style.display = "none";
 
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           if (response.success) {
-            message.innerHTML = '<span style="color: green;">Foto enviada com sucesso! 💖</span>';
+            message.innerHTML += '<br><span style="color: green;">Foto enviada com sucesso! 💖</span>';
             launchConfetti();
-            input.value = "";
           } else {
-            message.innerHTML = '<span style="color: red;">Erro ao enviar a imagem.</span>';
+            message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
           }
         } else {
-          message.innerHTML = '<span style="color: red;">Erro ao enviar a imagem.</span>';
+          message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
         }
+
+        if (callback) callback();
       };
 
       xhr.onerror = function() {
-        button.disabled = false;
         progressBarContainer.style.display = "none";
-        message.innerHTML = '<span style="color: red;">Erro de conexão. Tente novamente.</span>';
+        message.innerHTML += '<br><span style="color: red;">Erro de conexão. Tente novamente.</span>';
+        if (callback) callback();
       };
 
       xhr.send(formData);
     }
 
-    // 🎉 Confete simples
     function launchConfetti() {
       const canvas = document.getElementById("confettiCanvas");
       const ctx = canvas.getContext("2d");
@@ -245,7 +260,7 @@
       }
 
       animate();
-      setTimeout(() => canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height), 3000);
+      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
     }
   </script>
 </body>
