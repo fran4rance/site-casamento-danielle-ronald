@@ -2,48 +2,44 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Danielle & Ronald</title>
-  <!-- Fonte elegante -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    /* Seu CSS aqui (igual o anterior) */
+    /* Vou colocar só o que precisa pra barra funcionar */
     body {
-      margin: 0;
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(135deg, #fdfaf5, #f5f5dc);
       color: #2f3e2e;
+      margin: 0;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
-
     header {
       text-align: center;
       padding: 60px 20px 30px;
       border-bottom: 2px solid #e6d3c7;
       position: relative;
     }
-
     header h1 {
       font-family: 'Great Vibes', cursive;
       font-size: 3rem;
       margin: 0;
       color: #3e5c49;
     }
-
     header h1 span {
       color: #e2725b;
     }
-
     header p {
       font-size: 1.2rem;
       margin-top: 10px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
     }
-
     header::after {
       content: "";
       display: block;
@@ -53,7 +49,6 @@
       margin: 20px auto 0;
       border-radius: 2px;
     }
-
     .content {
       flex: 1;
       display: flex;
@@ -61,7 +56,6 @@
       justify-content: center;
       padding: 20px;
     }
-
     .upload-card {
       background-color: rgba(255, 255, 255, 0.95);
       border: 2px solid #ddd;
@@ -72,15 +66,13 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       text-align: center;
     }
-
     .upload-card input[type="file"] {
       font-size: 1rem;
       margin: 20px 0;
       width: 100%;
     }
-
     .upload-card button {
-      background-color: #3e5c49; /* verde elegante */
+      background-color: #3e5c49;
       border: none;
       padding: 12px 20px;
       color: #fff;
@@ -89,16 +81,34 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
-    .upload-card button:hover {
+    .upload-card button:hover:not(:disabled) {
       background-color: #2f3e2e;
     }
-
+    .upload-card button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
     .message {
       margin-top: 20px;
       font-size: 1rem;
     }
-
+    /* Barra de progresso */
+    #progressBarContainer {
+      width: 100%;
+      background-color: #eee;
+      border-radius: 10px;
+      margin: 20px 0 0;
+      height: 20px;
+      overflow: hidden;
+      display: none; /* esconde inicialmente */
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #3e5c49;
+      border-radius: 10px 0 0 10px;
+      transition: width 0.2s ease;
+    }
     footer {
       text-align: center;
       padding: 20px;
@@ -106,8 +116,6 @@
       color: #777;
       font-size: 0.9rem;
     }
-
-    /* 🎉 Confete estilizado */
     .confetti {
       position: fixed;
       top: 0;
@@ -122,54 +130,89 @@
 <body>
   <header>
     <h1><span>Danielle</span> & <span>Ronald</span></h1>
-    <p>Compartilhe suas fotos desse dia inesquecível 💖</p>
+    <p>
+      Compartilhe os momentos que você viveu nesse dia tão especial!<br />
+      Ajude a eternizar essa festa com suas fotos.<br />
+      Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.
+    </p>
   </header>
 
   <div class="content">
     <div class="upload-card">
       <input type="file" id="fileInput" accept="image/*" />
-      <button onclick="uploadFile()">Enviar foto</button>
+      <button id="uploadBtn">Enviar foto</button>
+      <div id="progressBarContainer">
+        <div id="progressBar"></div>
+      </div>
       <div class="message" id="message"></div>
     </div>
   </div>
 
-  <footer>14 de junho de 2025</footer>
+  <footer>14-06-2025</footer>
 
   <canvas class="confetti" id="confettiCanvas"></canvas>
 
   <script>
-    async function uploadFile() {
-      const input = document.getElementById("fileInput");
-      const file = input.files[0];
-      const message = document.getElementById("message");
-      message.innerHTML = "";
+    const input = document.getElementById("fileInput");
+    const button = document.getElementById("uploadBtn");
+    const message = document.getElementById("message");
+    const progressBarContainer = document.getElementById("progressBarContainer");
+    const progressBar = document.getElementById("progressBar");
 
-      if (!file) {
+    button.addEventListener("click", () => {
+      if (!input.files[0]) {
         message.innerHTML = '<span style="color: red;">Por favor, selecione uma imagem.</span>';
         return;
       }
+      uploadFile(input.files[0]);
+    });
+
+    function uploadFile(file) {
+      message.innerHTML = "";
+      button.disabled = true;
+      progressBarContainer.style.display = "block";
+      progressBar.style.width = "0%";
 
       const formData = new FormData();
       formData.append("image", file);
 
-      const apiKey = "c904a909344edca34de59a9817cad325"; // Substitua pela sua se quiser
+      const apiKey = "c904a909344edca34de59a9817cad325";
 
-      try {
-        const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-          method: "POST",
-          body: formData
-        });
-        const data = await response.json();
-        if (data.success) {
-          message.innerHTML = '<span style="color: green;">Foto enviada com sucesso! 💖</span>';
-          launchConfetti(); // 🎉
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.imgbb.com/1/upload?key=${apiKey}`, true);
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          progressBar.style.width = percent + "%";
+        }
+      };
+
+      xhr.onload = function() {
+        button.disabled = false;
+        progressBarContainer.style.display = "none";
+
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            message.innerHTML = '<span style="color: green;">Foto enviada com sucesso! 💖</span>';
+            launchConfetti();
+            input.value = "";
+          } else {
+            message.innerHTML = '<span style="color: red;">Erro ao enviar a imagem.</span>';
+          }
         } else {
           message.innerHTML = '<span style="color: red;">Erro ao enviar a imagem.</span>';
         }
-      } catch (error) {
-        console.error("Erro na requisição:", error);
+      };
+
+      xhr.onerror = function() {
+        button.disabled = false;
+        progressBarContainer.style.display = "none";
         message.innerHTML = '<span style="color: red;">Erro de conexão. Tente novamente.</span>';
-      }
+      };
+
+      xhr.send(formData);
     }
 
     // 🎉 Confete simples
