@@ -1,38 +1,266 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Danielle & Ronald</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Montserrat', sans-serif;
-      background: url('background.jpeg') no-repeat center center fixed;
-      background-size: cover;
+      background: linear-gradient(135deg, #fdfaf5, #f5f5dc);
+      color: #2f3e2e;
+      margin: 0;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    .logo-container {
+    header {
+      text-align: center;
+      padding: 60px 20px 30px;
+      border-bottom: 2px solid #e6d3c7;
+      position: relative;
+    }
+    header h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3rem;
+      margin: 0;
+      color: #3e5c49;
+    }
+    header h1 span {
+      color: #e2725b;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
+    }
+    header::after {
+      content: "";
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: #e2725b;
+      margin: 20px auto 0;
+      border-radius: 2px;
+    }
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .upload-card {
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 40px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       text-align: center;
     }
-    .logo-container img {
-      width: 200px;
-      height: auto;
+    .upload-card input[type="file"] {
+      font-size: 1rem;
+      margin: 20px 0;
+      width: 100%;
+    }
+    .upload-card button {
+      background-color: #3e5c49;
+      border: none;
+      padding: 12px 20px;
+      color: #fff;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .upload-card button:hover:not(:disabled) {
+      background-color: #2f3e2e;
+    }
+    .upload-card button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 1rem;
+    }
+    #progressBarContainer {
+      width: 100%;
+      background-color: #eee;
+      border-radius: 10px;
+      margin: 20px 0 0;
+      height: 20px;
+      overflow: hidden;
+      display: none;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #3e5c49;
+      border-radius: 10px 0 0 10px;
+      transition: width 0.2s ease;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #eee;
+      color: #777;
+      font-size: 0.9rem;
+    }
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-  <div class="logo-container">
-    <img src="logo png.png" alt="Logo D e R" />
+  <header>
+    <h1><span>Danielle</span> & <span>Ronald</span></h1>
+    <p>
+      Compartilhe os momentos que você viveu nesse dia tão especial!<br />
+      Ajude a eternizar essa festa com suas fotos.<br />
+      Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.
+    </p>
+  </header>
+
+  <div class="content">
+    <div class="upload-card">
+      <input type="file" id="fileInput" accept="image/*" multiple />
+      <button id="uploadBtn">Enviar foto</button>
+      <div id="progressBarContainer">
+        <div id="progressBar"></div>
+      </div>
+      <div class="message" id="message"></div>
+    </div>
   </div>
+
+  <footer>14-06-2025</footer>
+  <canvas class="confetti" id="confettiCanvas"></canvas>
+
+  <script>
+    const input = document.getElementById("fileInput");
+    const button = document.getElementById("uploadBtn");
+    const message = document.getElementById("message");
+    const progressBarContainer = document.getElementById("progressBarContainer");
+    const progressBar = document.getElementById("progressBar");
+
+    button.addEventListener("click", () => {
+      if (input.files.length === 0) {
+        message.innerHTML = '<span style="color: red;">Por favor, selecione pelo menos uma imagem.</span>';
+        return;
+      }
+
+      uploadMultipleFiles(input.files);
+    });
+
+    function uploadMultipleFiles(files) {
+      let index = 0;
+
+      function next() {
+        if (index >= files.length) {
+          button.disabled = false;
+          message.innerHTML += '<br><span style="color: green;">Todas as fotos foram enviadas! 🎉</span>';
+          input.value = "";
+          return;
+        }
+
+        message.innerHTML = `<span style="color: #555;">Enviando foto ${index + 1} de ${files.length}...</span>`;
+        uploadFile(files[index], () => {
+          index++;
+          next();
+        });
+      }
+
+      button.disabled = true;
+      progressBarContainer.style.display = "block";
+      progressBar.style.width = "0%";
+      next();
+    }
+
+    function uploadFile(file, callback) {
+      const formData = new FormData();
+      formData.append("image", file);
+      const apiKey = "c904a909344edca34de59a9817cad325";
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.imgbb.com/1/upload?key=${apiKey}`, true);
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          progressBar.style.width = percent + "%";
+        }
+      };
+
+      xhr.onload = function() {
+        progressBarContainer.style.display = "none";
+
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            message.innerHTML += '<br><span style="color: green;">Foto enviada com sucesso! 💖</span>';
+            launchConfetti();
+          } else {
+            message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
+          }
+        } else {
+          message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
+        }
+
+        if (callback) callback();
+      };
+
+      xhr.onerror = function() {
+        progressBarContainer.style.display = "none";
+        message.innerHTML += '<br><span style="color: red;">Erro de conexão. Tente novamente.</span>';
+        if (callback) callback();
+      };
+
+      xhr.send(formData);
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = Array.from({ length: 120 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        size: Math.random() * 6 + 4,
+        speed: Math.random() * 3 + 2,
+        color: ["#e2725b", "#3e5c49", "#f5f5dc"][Math.floor(Math.random() * 3)]
+      }));
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+          p.y += p.speed;
+        });
+      }
+
+      function animate() {
+        draw();
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
+    }
+  </script>
 </body>
 </html>
