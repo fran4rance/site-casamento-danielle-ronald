@@ -19,7 +19,6 @@
       text-align: center;
       padding: 60px 20px 30px;
       border-bottom: 2px solid #e6d3c7;
-      position: relative;
     }
     header h1 {
       font-family: 'Great Vibes', cursive;
@@ -37,15 +36,6 @@
       margin-left: auto;
       margin-right: auto;
       line-height: 1.4;
-    }
-    header::after {
-      content: "";
-      display: block;
-      width: 80px;
-      height: 4px;
-      background: #e2725b;
-      margin: 20px auto 0;
-      border-radius: 2px;
     }
     .content {
       flex: 1;
@@ -103,7 +93,6 @@
       height: 100%;
       width: 0%;
       background-color: #3e5c49;
-      border-radius: 10px 0 0 10px;
       transition: width 0.2s ease;
     }
     footer {
@@ -127,20 +116,14 @@
 <body>
   <header>
     <h1><span>Danielle</span> & <span>Ronald</span></h1>
-    <p>
-      Compartilhe os momentos que você viveu nesse dia tão especial!<br />
-      Ajude a eternizar essa festa com suas fotos.<br />
-      Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.
-    </p>
+    <p>Compartilhe os momentos que você viveu nesse dia tão especial!<br />Ajude a eternizar essa festa com suas fotos.<br />Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.</p>
   </header>
 
   <div class="content">
     <div class="upload-card">
       <input type="file" id="fileInput" accept="image/*" multiple />
       <button id="uploadBtn">Enviar foto</button>
-      <div id="progressBarContainer">
-        <div id="progressBar"></div>
-      </div>
+      <div id="progressBarContainer"><div id="progressBar"></div></div>
       <div class="message" id="message"></div>
     </div>
   </div>
@@ -160,9 +143,42 @@
         message.innerHTML = '<span style="color: red;">Por favor, selecione pelo menos uma imagem.</span>';
         return;
       }
-
       uploadMultipleFiles(input.files);
     });
+
+    function resizeImage(file, maxPixels, quality, callback) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = function (event) {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          const totalPixels = width * height;
+          if (totalPixels > maxPixels) {
+            const ratio = Math.sqrt(maxPixels / totalPixels);
+            width *= ratio;
+            height *= ratio;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(function (blob) {
+            const newFile = new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            callback(newFile);
+          }, "image/jpeg", quality);
+        };
+      };
+    }
 
     function uploadMultipleFiles(files) {
       let index = 0;
@@ -175,10 +191,12 @@
           return;
         }
 
-        message.innerHTML = `<span style="color: #555;">Enviando foto ${index + 1} de ${files.length}...</span>`;
-        uploadFile(files[index], () => {
-          index++;
-          next();
+        message.innerHTML = `<span style="color: #555;">Processando foto ${index + 1} de ${files.length}...</span>`;
+        resizeImage(files[index], 4000 * 4000, 0.85, (resizedFile) => {
+          uploadFile(resizedFile, () => {
+            index++;
+            next();
+          });
         });
       }
 
@@ -212,16 +230,15 @@
             message.innerHTML += '<br><span style="color: green;">Foto enviada com sucesso! 💖</span>';
             launchConfetti();
 
-            // ✅ Enviando automaticamente para o servidor no Render
             const imageUrl = response.data.url;
-            fetch('https://upload-drive-servidor.onrender.com/upload', {
+            fetch('https://script.google.com/macros/s/AKfycbylUJN6SwcuCxMpAIGrRKi-JHRzjNcwvy2BAE5RvTfE6gZQWllex3Tis4B1YtWEiJaaxA/exec', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ link: imageUrl })
             })
             .then(response => response.json())
-            .then(data => console.log('✅ Link enviado pro servidor:', data))
-            .catch(error => console.error('❌ Erro ao enviar link:', error));
+            .then(data => console.log('✅ Link enviado pro Google Sheets:', data))
+            .catch(error => console.error('❌ Erro ao enviar link pro Sheets:', error));
 
           } else {
             message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
