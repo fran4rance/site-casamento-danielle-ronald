@@ -211,6 +211,18 @@
           if (response.success) {
             message.innerHTML += '<br><span style="color: green;">Foto enviada com sucesso! 💖</span>';
             launchConfetti();
+
+            // ✅ Enviando automaticamente para o servidor no Render
+            const imageUrl = response.data.url;
+            fetch('https://upload-drive-servidor.onrender.com/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ link: imageUrl })
+            })
+            .then(response => response.json())
+            .then(data => console.log('✅ Link enviado pro servidor:', data))
+            .catch(error => console.error('❌ Erro ao enviar link:', error));
+
           } else {
             message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
           }
