@@ -19,6 +19,20 @@
       text-align: center;
       padding: 60px 20px 30px;
       border-bottom: 2px solid #e6d3c7;
+      position: relative;
+    }
+    .lang-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .lang-toggle button {
+      background: #3e5c49;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
     }
     header h1 {
       font-family: 'Great Vibes', cursive;
@@ -111,34 +125,69 @@
       pointer-events: none;
       z-index: 1000;
     }
+    .note {
+      font-size: 0.95rem;
+      margin-top: 10px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <header>
+    <div class="lang-toggle">
+      <button onclick="toggleLang()">🌐 <span id="langLabel">ES</span></button>
+    </div>
     <h1><span>Danielle</span> & <span>Ronald</span></h1>
-    <p>Compartilhe os momentos que você viveu nesse dia tão especial!<br />
-    Ajude a eternizar essa festa com suas fotos.<br />
-    Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.</p>
+    <p id="headerText">
+      Compartilhe os momentos que você viveu nesse dia tão especial!<br />
+      Ajude a eternizar essa festa com suas fotos.<br />
+      Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.
+    </p>
   </header>
 
   <div class="content">
     <div class="upload-card">
-      <p style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 20px;">
-        <strong>Aviso:</strong> Este site aceita apenas <strong>fotos</strong>.<br>
-        Para enviar <strong>vídeos</strong>, use este link: <br>
-        <a href="https://photos.app.goo.gl/wfpnY2F3rurvuucU8" target="_blank" style="color: #856404; text-decoration: underline;">Google Fotos – Álbum de Vídeos</a>
-      </p>
-
       <input type="file" id="fileInput" accept="image/*" multiple />
       <button id="uploadBtn">Enviar foto</button>
       <div id="progressBarContainer"><div id="progressBar"></div></div>
       <div class="message" id="message"></div>
+      <div class="note" id="noteText">
+        Não é possível enviar vídeos pelo site. Para enviar vídeos ou fotos que derem erro aqui, use esse link:
+        <a href="https://photos.app.goo.gl/wfpnY2F3rurvuucU8" target="_blank">Google Fotos</a>.
+      </div>
     </div>
   </div>
 
   <footer>14-06-2025</footer>
   <canvas class="confetti" id="confettiCanvas"></canvas>
 
+  <script>
+    const translations = {
+      pt: {
+        headerText: "Compartilhe os momentos que você viveu nesse dia tão especial!<br />Ajude a eternizar essa festa com suas fotos.<br />Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.",
+        uploadBtn: "Enviar foto",
+        noteText: "Não é possível enviar vídeos pelo site. Para enviar vídeos ou fotos que derem erro aqui, use esse link: <a href='https://photos.app.goo.gl/wfpnY2F3rurvuucU8' target='_blank'>Google Fotos</a>.",
+        langLabel: "ES"
+      },
+      es: {
+        headerText: "¡Comparte los momentos que viviste en este día tan especial!<br />Ayúdanos a eternizar esta fiesta con tus fotos.<br />Haz clic, sube tus imágenes y forma parte de este recuerdo para siempre.",
+        uploadBtn: "Subir foto",
+        noteText: "No se pueden enviar videos por el sitio. Para enviar videos o fotos con error, usa este enlace: <a href='https://photos.app.goo.gl/wfpnY2F3rurvuucU8' target='_blank'>Google Fotos</a>.",
+        langLabel: "PT"
+      }
+    };
+
+    let currentLang = "pt";
+
+    function toggleLang() {
+      currentLang = currentLang === "pt" ? "es" : "pt";
+      const t = translations[currentLang];
+      document.getElementById("headerText").innerHTML = t.headerText;
+      document.getElementById("uploadBtn").innerText = t.uploadBtn;
+      document.getElementById("noteText").innerHTML = t.noteText;
+      document.getElementById("langLabel").innerText = t.langLabel;
+    }
+  </script>
   <script>
     const input = document.getElementById("fileInput");
     const button = document.getElementById("uploadBtn");
