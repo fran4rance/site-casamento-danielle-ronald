@@ -116,11 +116,19 @@
 <body>
   <header>
     <h1><span>Danielle</span> & <span>Ronald</span></h1>
-    <p>Compartilhe os momentos que você viveu nesse dia tão especial!<br />Ajude a eternizar essa festa com suas fotos.<br />Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.</p>
+    <p>Compartilhe os momentos que você viveu nesse dia tão especial!<br />
+    Ajude a eternizar essa festa com suas fotos.<br />
+    Basta clicar, enviar suas imagens rapidinho e fazer parte dessa lembrança para sempre.</p>
   </header>
 
   <div class="content">
     <div class="upload-card">
+      <p style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 20px;">
+        <strong>Aviso:</strong> Este site aceita apenas <strong>fotos</strong>.<br>
+        Para enviar <strong>vídeos</strong>, use este link: <br>
+        <a href="https://photos.app.goo.gl/wfpnY2F3rurvuucU8" target="_blank" style="color: #856404; text-decoration: underline;">Google Fotos – Álbum de Vídeos</a>
+      </p>
+
       <input type="file" id="fileInput" accept="image/*" multiple />
       <button id="uploadBtn">Enviar foto</button>
       <div id="progressBarContainer"><div id="progressBar"></div></div>
@@ -231,7 +239,7 @@
             launchConfetti();
 
             const imageUrl = response.data.url;
-            fetch('https://script.google.com/macros/s/AKfycbylUJN6SwcuCxMpAIGrRKi-JHRzjNcwvy2BAE5RvTfE6gZQWllex3Tis4B1YtWEiJaaxA/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbyQoDw2M8BETkypuGtJYEbuuVPhdWHZNvJDuRH98-Sulul5KVPbk7NWXFGVQTi8strPNQ/exec', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ link: imageUrl })
@@ -239,7 +247,6 @@
             .then(response => response.json())
             .then(data => console.log('✅ Link enviado pro Google Sheets:', data))
             .catch(error => console.error('❌ Erro ao enviar link pro Sheets:', error));
-
           } else {
             message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
           }
