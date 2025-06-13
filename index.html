@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Casamento Danielle & Ronald</title>
+  <title>Danielle e Ronald</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- SDK do Uploadcare -->
   <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
@@ -12,14 +15,44 @@
   </script>
 
   <style>
+    :root {
+      --terracota: #D86C4C;
+      --verde: #4A6A58;
+      --bege: #F8F1E7;
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
+      margin: 0;
       padding: 2rem;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--bege);
+      text-align: center;
+      color: var(--verde);
     }
+
     h1 {
-      color: #c94d7c;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: var(--terracota);
+      margin-bottom: 0.5rem;
     }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    strong {
+      color: var(--terracota);
+    }
+
+    input[role="uploadcare-uploader"] {
+      margin-top: 2rem;
+    }
+
     #canvas {
       position: fixed;
       top: 0;
@@ -31,26 +64,32 @@
 </head>
 <body>
 
-  <h1>Bem-vindo ao nosso site de casamento!</h1>
-  <p>Envie aqui a sua foto da festa 💕</p>
+  <h1>Danielle e Ronald</h1>
+  <p>Que alegria ter você celebrando esse dia tão especial conosco!</p>
+  <p>Se você registrou algum momento da festa com o seu <strong>celular</strong>, envie as fotos por aqui 💛</p>
+  <p><strong>Como enviar:</strong> clique no botão abaixo, escolha as imagens e pronto — elas chegarão até nós com amor!</p>
 
   <!-- Botão de upload do Uploadcare -->
   <input type="hidden"
          role="uploadcare-uploader"
+         data-multiple
+         data-multiple-max="10"
          data-images-only
          data-crop="free"
          data-clearable
          data-tabs="file camera"
-         data-button-text="Clique aqui para enviar sua foto ♥" />
+         data-button-text="Enviar fotos da festa 📸" />
 
   <!-- Canvas para o confete -->
   <canvas id="canvas"></canvas>
 
   <script>
-    uploadcare.Widget('[role=uploadcare-uploader]').onUploadComplete(function(info) {
-      console.log('Imagem enviada com sucesso!', info.cdnUrl);
-      alert("Imagem enviada com sucesso!");
-      launchConfetti();
+    uploadcare.Widget('[role=uploadcare-uploader]').onChange(function(fileGroup) {
+      fileGroup.promise().then(function(groupInfo) {
+        console.log('Imagens enviadas:', groupInfo.files);
+        alert("Imagens enviadas com sucesso! Obrigado por compartilhar esse momento 💕");
+        launchConfetti();
+      });
     });
 
     function launchConfetti() {
@@ -62,7 +101,7 @@
       for (let i = 0; i < 100; i++) {
         ctx.beginPath();
         ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 5, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        ctx.fillStyle = `hsl(${Math.random() * 30 + 10}, 70%, 60%)`; // tons quentes
         ctx.fill();
       }
 
