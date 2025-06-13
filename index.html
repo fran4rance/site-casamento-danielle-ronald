@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Danielle e Ronald</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet" />
   <style>
@@ -52,6 +52,10 @@
       margin: 20px auto 40px;
       padding: 30px 20px;
       max-width: 500px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .button {
@@ -59,11 +63,11 @@
       color: white;
       border: none;
       padding: 12px 24px;
-      margin: 10px;
       font-size: 1em;
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      flex: 1 1 150px;
     }
 
     .button:hover {
@@ -84,11 +88,19 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      z-index: 10;
     }
 
     .lang-toggle img {
       width: 18px;
       height: 18px;
+    }
+
+    #uploadStatus {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #3e5e4e;
+      min-height: 24px;
     }
 
     @media (max-width: 600px) {
@@ -98,6 +110,14 @@
       .description {
         font-size: 1em;
         padding: 0 10px;
+      }
+      .upload-box {
+        flex-direction: column;
+      }
+      .button {
+        flex: none;
+        width: 100%;
+        max-width: 320px;
       }
     }
   </style>
@@ -123,13 +143,13 @@
   </p>
 
   <div class="upload-box">
-    <button class="button" onclick="window.location.href='https://seu-endpoint-de-upload.com'">
-      Enviar pelo site
-    </button>
-    <button class="button" onclick="window.location.href='https://photos.google.com'">
-      Google Fotos
-    </button>
+    <button class="button" id="btnUploadSite">Envio rápido pelo site</button>
+    <button class="button" onclick="window.open('https://photos.app.goo.gl/wfpnY2F3rurvuucU8', '_blank')">Google Fotos</button>
   </div>
+
+  <input type="file" id="fileInput" multiple accept="image/*" style="display:none" />
+
+  <div id="uploadStatus"></div>
 
   <script>
     const texts = {
@@ -138,14 +158,20 @@
           Ajude a eternizar essa festa com suas fotos.<br/>
           Basta clicar abaixo e enviar suas imagens rapidinho.`,
         warning: "Não é possível enviar vídeos pelo site. Para enviar vídeos, use o botão do Google Fotos.",
-        label: "ES"
+        label: "ES",
+        uploading: "Enviando imagens...",
+        success: "Imagens enviadas com sucesso! Obrigado!",
+        error: "Erro ao enviar. Tente novamente."
       },
       es: {
         description: `¡Comparte los momentos que viviste en este día tan especial!<br/>
           Ayuda a eternizar esta fiesta con tus fotos.<br/>
           Solo haz clic abajo para enviar tus imágenes fácilmente.`,
         warning: "No es posible enviar videos por el sitio. Para enviar videos, usa el botón de Google Fotos.",
-        label: "PT"
+        label: "PT",
+        uploading: "Enviando imágenes...",
+        success: "¡Imágenes enviadas con éxito! ¡Gracias!",
+        error: "Error al enviar. Por favor intenta de nuevo."
       }
     };
 
@@ -156,7 +182,70 @@
       document.getElementById('text-description').innerHTML = texts[currentLang].description;
       document.getElementById('text-warning').innerHTML = texts[currentLang].warning;
       document.getElementById('lang-label').textContent = texts[currentLang].label;
+      document.getElementById('uploadStatus').textContent = '';
     }
+
+    const btnUploadSite = document.getElementById('btnUploadSite');
+    const fileInput = document.getElementById('fileInput');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    btnUploadSite.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length === 0) return;
+
+      uploadStatus.style.color = '#3e5e4e';
+      uploadStatus.textContent = texts[currentLang].uploading;
+
+      // Exemplo para ImgBB, substitua a chave pela sua
+      const API_KEY = 'SUA_API_KEY_DO_IMGBB_AQUI';
+      const URL = `https://api.imgbb.com/1/upload?key=${API_KEY}`;
+
+      const files = Array.from(fileInput.files);
+      let uploadPromises = [];
+
+      files.forEach(file => {
+        const reader = new FileReader();
+
+        uploadPromises.push(new Promise((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+
+            fetch(URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                image: base64,
+                name: file.name
+              }),
+            }).then(res => res.json())
+              .then(json => {
+                if (json.success) {
+                  resolve(json.data.url);
+                } else {
+                  reject('Erro no upload: ' + json.error.message);
+                }
+              })
+              .catch(err => reject(err));
+          };
+          reader.onerror = () => reject('Erro ao ler arquivo');
+          reader.readAsDataURL(file);
+        }));
+      });
+
+      Promise.all(uploadPromises)
+        .then(urls => {
+          uploadStatus.style.color = 'green';
+          uploadStatus.textContent = texts[currentLang].success + ' (' + urls.length + ' fotos)';
+          fileInput.value = '';
+        })
+        .catch(() => {
+          uploadStatus.style.color = '#b0413e';
+          uploadStatus.textContent = texts[currentLang].error;
+        });
+    });
   </script>
 </body>
 </html>
