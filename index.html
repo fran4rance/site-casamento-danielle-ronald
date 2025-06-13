@@ -178,7 +178,6 @@
     };
 
     let currentLang = "pt";
-
     function toggleLang() {
       currentLang = currentLang === "pt" ? "es" : "pt";
       const t = translations[currentLang];
@@ -214,17 +213,14 @@
           const canvas = document.createElement("canvas");
           let width = img.width;
           let height = img.height;
-
           const totalPixels = width * height;
           if (totalPixels > maxPixels) {
             const ratio = Math.sqrt(maxPixels / totalPixels);
             width *= ratio;
             height *= ratio;
           }
-
           canvas.width = width;
           canvas.height = height;
-
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob(function (blob) {
@@ -240,7 +236,6 @@
 
     function uploadMultipleFiles(files) {
       let index = 0;
-
       function next() {
         if (index >= files.length) {
           button.disabled = false;
@@ -248,7 +243,6 @@
           input.value = "";
           return;
         }
-
         message.innerHTML = `<span style="color: #555;">Processando foto ${index + 1} de ${files.length}...</span>`;
         resizeImage(files[index], 16000000, 0.85, (resizedFile) => {
           uploadFile(resizedFile, () => {
@@ -257,7 +251,6 @@
           });
         });
       }
-
       button.disabled = true;
       progressBarContainer.style.display = "block";
       progressBar.style.width = "0%";
@@ -267,8 +260,7 @@
     function uploadFile(file, callback) {
       const formData = new FormData();
       formData.append("image", file);
-      const apiKey = "c904a909344edca34de59a9817cad325";
-
+      const apiKey = "4611ebc806e0e6180a1f44ff4809cbe8";
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `https://api.imgbb.com/1/upload?key=${apiKey}`, true);
 
@@ -281,13 +273,11 @@
 
       xhr.onload = function() {
         progressBarContainer.style.display = "none";
-
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           if (response.success) {
             message.innerHTML += '<br><span style="color: green;">Foto enviada com sucesso! 💖</span>';
             launchConfetti();
-
             const imageUrl = response.data.url;
             fetch('https://script.google.com/macros/s/AKfycbyQoDw2M8BETkypuGtJYEbuuVPhdWHZNvJDuRH98-Sulul5KVPbk7NWXFGVQTi8strPNQ/exec', {
               method: 'POST',
@@ -303,7 +293,6 @@
         } else {
           message.innerHTML += '<br><span style="color: red;">Erro ao enviar a imagem.</span>';
         }
-
         if (callback) callback();
       };
 
@@ -321,7 +310,6 @@
       const ctx = canvas.getContext("2d");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-
       const pieces = Array.from({ length: 120 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
@@ -329,7 +317,6 @@
         speed: Math.random() * 3 + 2,
         color: ["#e2725b", "#3e5c49", "#f5f5dc"][Math.floor(Math.random() * 3)]
       }));
-
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         pieces.forEach(p => {
@@ -338,12 +325,10 @@
           p.y += p.speed;
         });
       }
-
       function animate() {
         draw();
         requestAnimationFrame(animate);
       }
-
       animate();
       setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
     }
