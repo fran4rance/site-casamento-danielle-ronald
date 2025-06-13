@@ -188,6 +188,7 @@
       document.getElementById("langLabel").innerText = t.langLabel;
     }
   </script>
+
   <script>
     const input = document.getElementById("fileInput");
     const button = document.getElementById("uploadBtn");
@@ -248,8 +249,8 @@
           return;
         }
 
-        message.innerHTML = <span style="color: #555;">Processando foto ${index + 1} de ${files.length}...</span>;
-        resizeImage(files[index], 4000 * 4000, 0.85, (resizedFile) => {
+        message.innerHTML = `<span style="color: #555;">Processando foto ${index + 1} de ${files.length}...</span>`;
+        resizeImage(files[index], 16000000, 0.85, (resizedFile) => {
           uploadFile(resizedFile, () => {
             index++;
             next();
@@ -269,7 +270,7 @@
       const apiKey = "c904a909344edca34de59a9817cad325";
 
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", https://api.imgbb.com/1/upload?key=${apiKey}, true);
+      xhr.open("POST", `https://api.imgbb.com/1/upload?key=${apiKey}`, true);
 
       xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
