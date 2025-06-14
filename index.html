@@ -1,48 +1,176 @@
-<script>
-  function setLang(lang) {
-    document.querySelectorAll('.lang').forEach(el => {
-      el.textContent = el.dataset[lang];
-    });
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Danielle e Ronald</title>
 
-    const uploader = document.querySelector('#upload');
-    if (lang === 'es') {
-      uploader.setAttribute('data-button-text', 'Enviar fotos de la fiesta 📸');
-      window.UPLOADCARE_LOCALE = 'es';
-    } else {
-      uploader.setAttribute('data-button-text', 'Enviar fotos da festa 📸');
-      window.UPLOADCARE_LOCALE = 'pt';
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <!-- Uploadcare SDK -->
+  <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" defer></script>
+  <script>
+    window.UPLOADCARE_PUBLIC_KEY = '03ddda07c52c91886d5c';
+  </script>
+
+  <style>
+    :root {
+      --terracota: #D86C4C;
+      --verde: #4A6A58;
+      --bege: #F8F1E7;
     }
 
-    uploadcare.Widget(uploader).rebuild();
-  }
-
-  function launchConfetti() {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    for (let i = 0; i < 100; i++) {
-      ctx.beginPath();
-      ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 5, 0, Math.PI * 2);
-      ctx.fillStyle = `hsl(${Math.random() * 30 + 10}, 70%, 60%)`;
-      ctx.fill();
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--bege);
+      text-align: center;
+      color: var(--verde);
     }
 
-    setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
-  }
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3.5rem;
+      color: var(--terracota);
+      margin-bottom: 0.2rem;
+    }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    setLang('pt');
+    p {
+      font-size: 1.15rem;
+      max-width: 600px;
+      margin: 0.5rem auto;
+      line-height: 1.6;
+    }
 
-    uploadcare.Widget('#upload').onChange(fileGroup => {
-      fileGroup.promise().then(() => {
-        const msg = document.getElementById('mensagem-sucesso');
-        msg.style.display = 'block';
-        const currentLang = window.UPLOADCARE_LOCALE === 'es' ? 'es' : 'pt';
-        msg.textContent = msg.dataset[currentLang];
-        launchConfetti();
+    #idioma {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+
+    #idioma button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+
+    input[role="uploadcare-uploader"] {
+      margin-top: 2rem;
+      transform: scale(1.05);
+    }
+
+    #mensagem-sucesso {
+      margin-top: 2rem;
+      font-weight: bold;
+      color: var(--terracota);
+      font-size: 1.3rem;
+      display: none;
+    }
+
+    #canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="idioma">
+    <button onclick="setLang('pt')" title="Português">🇧🇷</button>
+    <button onclick="setLang('es')" title="Español">🇪🇸</button>
+  </div>
+
+  <h1 class="lang" data-pt="Danielle e Ronald" data-es="Danielle y Ronald"></h1>
+
+  <p class="lang"
+     data-pt="Que alegria ter você celebrando esse dia tão especial conosco!"
+     data-es="¡Qué alegría tenerte celebrando este día tan especial con nosotros!"></p>
+
+  <p class="lang"
+     data-pt="Se você registrou algum momento da festa com o seu celular, envie as fotos por aqui 💛"
+     data-es="Si registraste algún momento de la fiesta con tu celular, ¡envíanos tus fotos por aquí! 💛"></p>
+
+  <p style="font-weight: 600; font-size: 1.2rem; color: var(--terracota);" class="lang"
+     data-pt="Como enviar:" data-es="¿Cómo enviar?"></p>
+
+  <p class="lang" style="font-style: italic;"
+     data-pt="Toque no botão abaixo para abrir a galeria do seu celular. Selecione as fotos que deseja compartilhar e aguarde a confirmação."
+     data-es="Toca el botón de abajo para abrir la galería de tu celular. Selecciona las fotos que deseas compartir y espera la confirmación."></p>
+
+  <!-- Botão de upload -->
+  <input type="hidden"
+         id="upload"
+         role="uploadcare-uploader"
+         data-multiple
+         data-multiple-max="10"
+         data-images-only
+         data-crop="free"
+         data-clearable
+         data-tabs="file"
+         data-button-text="Enviar fotos da festa 📸" />
+
+  <!-- Mensagem de sucesso -->
+  <div id="mensagem-sucesso" class="lang"
+       data-pt="✨ Fotos enviadas com sucesso! Obrigado por compartilhar 💕"
+       data-es="✨ ¡Fotos enviadas con éxito! Gracias por compartir 💕">
+  </div>
+
+  <!-- Canvas confete -->
+  <canvas id="canvas"></canvas>
+
+  <script>
+    function setLang(lang) {
+      document.querySelectorAll('.lang').forEach(el => {
+        el.textContent = el.dataset[lang];
+      });
+
+      const uploader = document.querySelector('#upload');
+      if (lang === 'es') {
+        uploader.setAttribute('data-button-text', 'Enviar fotos de la fiesta 📸');
+        window.UPLOADCARE_LOCALE = 'es';
+      } else {
+        uploader.setAttribute('data-button-text', 'Enviar fotos da festa 📸');
+        window.UPLOADCARE_LOCALE = 'pt';
+      }
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      for (let i = 0; i < 100; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${Math.random() * 30 + 10}, 70%, 60%)`;
+        ctx.fill();
+      }
+
+      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setLang('pt');
+
+      uploadcare.Widget('#upload').onChange(fileGroup => {
+        fileGroup.promise().then(() => {
+          const msg = document.getElementById('mensagem-sucesso');
+          msg.style.display = 'block';
+          const currentLang = window.UPLOADCARE_LOCALE === 'es' ? 'es' : 'pt';
+          msg.textContent = msg.dataset[currentLang];
+          launchConfetti();
+        });
       });
     });
-  });
-</script>
+  </script>
+
+</body>
+</html>
